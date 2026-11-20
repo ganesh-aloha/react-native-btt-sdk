@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+- Automatic screen tracking now names screens by their header title (`headerTitle`, then `title`), falling back to the route name. Screens that set a title are reported under the new name, which can affect existing dashboards and remotely ignored screen names.
+- Fixed screens not being tracked again after the app returns from the background.
+
 ## [1.1.0] Blue Triangle - Latest
 - Updated native SDKs: iOS BlueTriangleSDK-Swift 3.16.0, Android btt-android-sdk 2.20.0.
 - Fixed custom network tracking host and domain extraction issue from network URLs

@@ -98,6 +98,8 @@ BTTNavigationContainerTracker has a single method for screen tracking which is c
 
 This solution is based on [React Navigation](https://reactnavigation.org/docs/screen-tracking/) reference for screen tracking analytics.
 
+Screens are tracked by their `headerTitle` (when it is a string) or `title`, falling back to the route `name`.
+
 With the above setup, all screens can be track except when the app put in background. In that case, we don't get onStateChange callback. Hence, to overcome this we need to add another listener to track when app is put in background and when it comes back to foreground. To do that add the following code snippet in your app component.
 
 ```js
