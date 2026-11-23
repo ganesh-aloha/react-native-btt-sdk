@@ -165,5 +165,9 @@
       ]
     ]
   },
-  "dependencies": {}
+  "dependencies": {},
+  "resolutions": {
+    "basic-ftp": "^6.2.6",
+    "fast-xml-parser": "^5.12.1"
+  }
 }
