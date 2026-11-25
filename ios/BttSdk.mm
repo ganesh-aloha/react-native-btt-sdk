@@ -44,6 +44,7 @@ RCT_EXTERN_METHOD(setCustomCategory2:(NSString *)value)
 RCT_EXTERN_METHOD(setCustomCategory3:(NSString *)value)
 RCT_EXTERN_METHOD(setCustomCategory4:(NSString *)value)
 RCT_EXTERN_METHOD(setCustomCategory5:(NSString *)value)
+RCT_EXTERN_METHOD(setGroupName:(NSString *)value)
 
 // method exposed for getting the js stack
 RCT_EXTERN_METHOD(trackJsError:(NSString *)stack)
