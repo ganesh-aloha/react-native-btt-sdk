@@ -298,6 +298,11 @@ class BttSdkModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
+    fun setGroupName(value : String?){
+        value?.let { Tracker.instance?.setGroupName(it) }
+    }
+
+    @ReactMethod
     fun setCampaignName(value : String?){
         Tracker.instance?.setSessionCampaignName(value)
     }

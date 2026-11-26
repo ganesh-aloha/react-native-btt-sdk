@@ -1,11 +1,11 @@
 import { AppState } from 'react-native';
 import BTTScreenTracker from './BTTScreenTracker';
-
-let trackerName = '';
-let trackerID = '';
+import BttSdk from './BttSdk';
 
 interface NavigationRef {
-  getCurrentRoute(): Route;
+  getCurrentRoute(): Route | undefined;
+  getCurrentOptions?(): ScreenOptions | undefined;
+  addListener?(type: 'options', callback: () => void): () => void;
 }
 
 interface Route {
@@ -13,61 +13,62 @@ interface Route {
   name: string;
 }
 
+interface ScreenOptions {
+  title?: string;
+  headerTitle?: unknown;
+}
+
+interface ActiveScreen {
+  id: string;
+  name: string;
+}
+
+function getScreenTitle(options: ScreenOptions | undefined): string | undefined {
+  const title = [options?.headerTitle, options?.title].find(
+    (value): value is string => typeof value === 'string' && value.trim() !== ''
+  );
+  return title?.trim();
+}
+
+function getScreenName(route: Route, options: ScreenOptions | undefined): string {
+  return getScreenTitle(options) ?? route.name;
+}
+
 class BTTNavigationContainerTracker {
 
-  private static isListenerAttached: Boolean = false
+  private static isListenerAttached: boolean = false
+  private static activeScreen: ActiveScreen | undefined;
 
-  static applicationDidEnterBackground(navigationRef: NavigationRef) {
-    const route = navigationRef?.getCurrentRoute?.();
-
-    if (!route) return;
-
-    const currentKey = route?.key;
-    const currentName = route?.name;
-
-    if (currentName && currentKey) {
-      BTTScreenTracker.viewingEnd(currentName, currentKey);
-    }
+  static applicationDidEnterBackground(_navigationRef?: NavigationRef) {
+    BTTNavigationContainerTracker.endActiveScreen();
   }
-  
+
   static onContainerStateChange(navigationRef: NavigationRef) {
     const route = navigationRef?.getCurrentRoute?.();
 
-    if (!route) return;
+    if (!route?.key || !route.name) return;
 
-    const currentKey = route?.key;
-    const currentName = route?.name;
-
-    // Extra safety
-    if (!currentKey || !currentName) return;
-
-    if (!this.isListenerAttached) {
-      this.attachBackgroundListener(navigationRef);
-      this.isListenerAttached = true;
+    if (!BTTNavigationContainerTracker.isListenerAttached) {
+      BTTNavigationContainerTracker.attachBackgroundListener(navigationRef);
+      BTTNavigationContainerTracker.attachOptionsListener(navigationRef);
+      BTTNavigationContainerTracker.isListenerAttached = true;
     }
 
-    const previousRouteName = trackerName;
-    const previousRouteId = trackerID;
+    if (BTTNavigationContainerTracker.activeScreen?.id === route.key) return;
 
-    // First screen load
-    if (previousRouteId == null) {
-      BTTScreenTracker.viewStart(currentName, currentKey);
-      trackerName = currentName;
-      trackerID = currentKey;
-      return;
-    }
+    BTTNavigationContainerTracker.endActiveScreen();
 
-    // Route change
-    if (previousRouteId !== currentKey) {
-      if (previousRouteName && previousRouteId) {
-        BTTScreenTracker.viewingEnd(previousRouteName, previousRouteId);
-      }
+    const name = getScreenName(route, navigationRef.getCurrentOptions?.());
+    BTTScreenTracker.viewStart(name, route.key);
+    BTTNavigationContainerTracker.activeScreen = { id: route.key, name };
+  }
 
-      BTTScreenTracker.viewStart(currentName, currentKey);
+  private static endActiveScreen() {
+    const screen = BTTNavigationContainerTracker.activeScreen;
+    if (!screen) return;
 
-      trackerName = currentName;
-      trackerID = currentKey;
-    }
+    BTTScreenTracker.viewingEnd(screen.name, screen.id);
+    BTTNavigationContainerTracker.activeScreen = undefined;
   }
 
   private static attachBackgroundListener(navigationRef: NavigationRef) {
@@ -75,14 +76,48 @@ class BTTNavigationContainerTracker {
     AppState.addEventListener('change', (state) => {
       if (state === 'active') {
         console.log("App moved to foreground")
-        // do this
         BTTNavigationContainerTracker.onContainerStateChange(navigationRef);
       } else if (state === 'background') {
         console.log("App moved to background")
-        // do that
         BTTNavigationContainerTracker.applicationDidEnterBackground(navigationRef);
       }
     });
+  }
+
+  private static attachOptionsListener(navigationRef: NavigationRef) {
+    navigationRef.addListener?.('options', () => {
+      const active = BTTNavigationContainerTracker.activeScreen;
+      if (!active) return;
+
+      // Options can change for a screen that is not the one being tracked.
+      const route = navigationRef?.getCurrentRoute?.();
+      if (route?.key !== active.id || !route.name) return;
+
+      // Only a title carries a better name than the one the screen started with.
+      // An options change without one says nothing about naming, and the route
+      // name is already in use, so there is nothing to apply.
+      const title = getScreenTitle(navigationRef.getCurrentOptions?.());
+      if (!title || title === active.name) return;
+
+      // Only remember the new name once it has actually been applied, so a later
+      // options event can try again.
+      if (BTTNavigationContainerTracker.applyGroupName(title)) {
+        active.name = title;
+      }
+    });
+  }
+
+  private static applyGroupName(name: string): boolean {
+    try {
+      if (typeof BttSdk?.setGroupName !== 'function') {
+        return false;
+      }
+
+      BttSdk.setGroupName(name);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
 

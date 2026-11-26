@@ -354,6 +354,13 @@ class BttSdk: NSObject {
     }
 
     @objc
+    func setGroupName(_ value : String?){
+        if let value = value {
+            BlueTriangle.setGroupName(value)
+        }
+    }
+
+    @objc
     func trackJsError(_ stack: String) {
         struct JsStackError: Error, CustomStringConvertible {
             let description: String
