@@ -1,5 +1,21 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
+> [!WARNING]
+> **This example app is not a production release setup.** By default its Android release build is signed with the public debug keystore (`android/app/debug.keystore`) that is committed to this repository. Do not distribute such builds, and do not copy this signing configuration into your own app. See [Signed Android APK](https://reactnative.dev/docs/signed-apk-android) to create your own keystore.
+
+## Android release signing (optional)
+
+To sign the example's release build with your own keystore, set these four values as Gradle properties (for example in `~/.gradle/gradle.properties`, **never** in this repository) or as environment variables:
+
+```properties
+BTT_EXAMPLE_RELEASE_STORE_FILE=/absolute/path/to/your-release.keystore
+BTT_EXAMPLE_RELEASE_STORE_PASSWORD=********
+BTT_EXAMPLE_RELEASE_KEY_ALIAS=your-key-alias
+BTT_EXAMPLE_RELEASE_KEY_PASSWORD=********
+```
+
+If any of them is missing, the release build falls back to the debug keystore and Gradle prints a warning. Debug builds always use the debug keystore.
+
 # Getting Started
 
 > **Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.

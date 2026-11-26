@@ -62,6 +62,13 @@ buck-out/
 android/app/libs
 android/keystores/debug.keystore
 
+# Signing keys: never commit real keystores. The example's public debug
+# keystore is the only exception (it is intentionally not secret).
+*.jks
+*.keystore
+*.p12
+!example/android/app/debug.keystore
+
 # Expo
 .expo/
 
