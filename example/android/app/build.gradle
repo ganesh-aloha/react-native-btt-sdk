@@ -74,23 +74,28 @@ def enableProguardInReleaseBuilds = false
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 /**
- * Release signing for this EXAMPLE app (see the warning in `signingConfigs`).
- * Values are read from Gradle properties first, then environment variables.
+ * ============================================================================
+ *  NOTE: THIS IS AN EXAMPLE APP. IT IS NOT A PRODUCTION RELEASE SETUP.
+ * ============================================================================
+ * Debug builds are signed with your local Android debug keystore
+ * (~/.android/debug.keystore), which the Android Gradle Plugin creates
+ * automatically. Release builds are not signed. A release build of this
+ * example must never be distributed.
+ *
+ * Do not copy this setup into your own app. For release builds of your app,
+ * use your own signing credentials:
+ * https://reactnative.dev/docs/signed-apk-android
  */
-def releaseSigningValue = { String name ->
-    def value = project.findProperty(name) ?: System.getenv(name)
-    return value ? value.toString() : null
-}
-def hasReleaseSigning = [
-    'BTT_EXAMPLE_RELEASE_STORE_FILE',
-    'BTT_EXAMPLE_RELEASE_STORE_PASSWORD',
-    'BTT_EXAMPLE_RELEASE_KEY_ALIAS',
-    'BTT_EXAMPLE_RELEASE_KEY_PASSWORD',
-].every { releaseSigningValue(it) != null }
-
-if (!hasReleaseSigning && gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') }) {
-    logger.warn('WARNING: The BTT SDK example release build is signed with the PUBLIC DEBUG keystore. ' +
-        'It is NOT for production. Set the BTT_EXAMPLE_RELEASE_* properties to use your own keystore.')
+if (gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') }) {
+    logger.warn("""
++--------------------------------------------------------------------------+
+| WARNING: This is the BTT SDK EXAMPLE app. It is NOT for production.      |
+| Do not distribute it.                                                    |
+| This release build is UNSIGNED and cannot be installed as-is.            |
+|                                                                          |
+| For release builds of your own app, use your own signing credentials:    |
+| https://reactnative.dev/docs/signed-apk-android                          |
++--------------------------------------------------------------------------+""")
 }
 
 android {
@@ -106,51 +111,14 @@ android {
         versionCode 1
         versionName "1.0"
     }
-    // ------------------------------------------------------------------
-    // WARNING: THIS IS A SAMPLE APP. ITS SIGNING SETUP IS NOT FOR PRODUCTION.
-    //
-    // `debug.keystore` below is the public React Native debug keystore that
-    // is committed to this repository. Anyone can sign an APK with it.
-    // Do NOT copy this configuration into a production app. Generate your
-    // own upload keystore and keep it (and its passwords) out of source
-    // control: https://reactnative.dev/docs/signed-apk-android
-    //
-    // Release builds of this example are signed with a separate keystore
-    // when all of the following Gradle properties (or environment variables
-    // with the same name) are provided, e.g. in ~/.gradle/gradle.properties:
-    //   BTT_EXAMPLE_RELEASE_STORE_FILE
-    //   BTT_EXAMPLE_RELEASE_STORE_PASSWORD
-    //   BTT_EXAMPLE_RELEASE_KEY_ALIAS
-    //   BTT_EXAMPLE_RELEASE_KEY_PASSWORD
-    // Otherwise they fall back to the debug keystore so the example still
-    // builds locally and in CI.
-    // ------------------------------------------------------------------
-    signingConfigs {
-        debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
-        }
-        if (hasReleaseSigning) {
-            release {
-                storeFile file(releaseSigningValue('BTT_EXAMPLE_RELEASE_STORE_FILE'))
-                storePassword releaseSigningValue('BTT_EXAMPLE_RELEASE_STORE_PASSWORD')
-                keyAlias releaseSigningValue('BTT_EXAMPLE_RELEASE_KEY_ALIAS')
-                keyPassword releaseSigningValue('BTT_EXAMPLE_RELEASE_KEY_PASSWORD')
-            }
-        }
-    }
     buildTypes {
         debug {
+            // `signingConfigs.debug` is the Android Gradle Plugin default. It uses
+            // ~/.android/debug.keystore and creates it automatically if missing.
             debuggable true
             signingConfig signingConfigs.debug
         }
         release {
-            // Uses the separate release keystore when configured (see above);
-            // otherwise falls back to the PUBLIC debug keystore. Such an APK
-            // must never be distributed.
-            signingConfig hasReleaseSigning ? signingConfigs.release : signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

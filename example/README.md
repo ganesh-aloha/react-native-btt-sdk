@@ -1,20 +1,15 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 > [!WARNING]
-> **This example app is not a production release setup.** By default its Android release build is signed with the public debug keystore (`android/app/debug.keystore`) that is committed to this repository. Do not distribute such builds, and do not copy this signing configuration into your own app. See [Signed Android APK](https://reactnative.dev/docs/signed-apk-android) to create your own keystore.
+> **This is an example app. It is not a production release setup.**
+> Use it to try out the Blue Triangle React Native SDK. Do not distribute its builds, and do not copy its build configuration into your own app. For release builds of your app, use your own signing credentials.
 
-## Android release signing (optional)
+## Android signing
 
-To sign the example's release build with your own keystore, set these four values as Gradle properties (for example in `~/.gradle/gradle.properties`, **never** in this repository) or as environment variables:
+- **Debug builds** are signed with your local Android debug keystore (`~/.android/debug.keystore`), which the Android Gradle Plugin creates automatically. No setup is needed.
+- **Release builds** are not signed, so they cannot be installed on a device as-is. They print a warning in the terminal as a reminder that this example is **not for distribution**.
 
-```properties
-BTT_EXAMPLE_RELEASE_STORE_FILE=/absolute/path/to/your-release.keystore
-BTT_EXAMPLE_RELEASE_STORE_PASSWORD=********
-BTT_EXAMPLE_RELEASE_KEY_ALIAS=your-key-alias
-BTT_EXAMPLE_RELEASE_KEY_PASSWORD=********
-```
-
-If any of them is missing, the release build falls back to the debug keystore and Gradle prints a warning. Debug builds always use the debug keystore.
+For release builds of your own app, sign with your own credentials. See [Signed Android APK](https://reactnative.dev/docs/signed-apk-android).
 
 # Getting Started
 
